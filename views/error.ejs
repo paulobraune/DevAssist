@@ -7,9 +7,16 @@
       <div class="alert alert-warning">
         <p><%= message %></p>
       </div>
-      <a href="/" class="btn">
-        <i class="fas fa-home"></i> Voltar para a página inicial
-      </a>
+      <div class="actions" style="margin-top: 20px;">
+        <a href="/" class="btn">
+          <i class="fas fa-home"></i> Voltar para a página inicial
+        </a>
+        <% if (typeof title !== 'undefined' && title.includes("Análise")) { %>
+          <button onclick="window.history.back()" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+          </button>
+        <% } %>
+      </div>
     </div>
   </div>
 </div>
