@@ -1,0 +1,36 @@
+<div class="container">
+  <div class="file-view-container">
+    <div class="file-header">
+      <h2><i class="fas fa-search-plus"></i> Análise do Arquivo: <%= filename %></h2>
+    </div>
+    
+    <div class="panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-file-code"></i> Código Original</h2>
+      </div>
+      <div class="panel-body">
+        <pre><%= content %></pre>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-robot"></i> Análise do DevAssist GPT</h2>
+      </div>
+      <div class="panel-body">
+        <div class="analysis-content">
+          <%- analysis.replace(/\n/g, '<br>').replace(/```([\s\S]*?)```/g, '<pre>$1</pre>').replace(/`([^`]+)`/g, '<code>$1</code>') %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <a href="/" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar para a página inicial
+      </a>
+      <a href="/file/<%= filename %>" class="btn">
+        <i class="fas fa-file-alt"></i> Ver Arquivo Original
+      </a>
+    </div>
+  </div>
+</div>
