@@ -17,6 +17,9 @@
                 <li>
                   <i class="fas fa-file-code file-icon"></i>
                   <a href="/file/<%= file %>"><%= file %></a>
+                  <a href="/analyze/<%= file %>" class="btn btn-small" title="Analisar com IA">
+                    <i class="fas fa-search"></i>
+                  </a>
                 </li>
               <% }); %>
             <% } %>
@@ -38,6 +41,18 @@
               <i class="fas fa-upload"></i> Enviar Arquivo
             </button>
           </form>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-header">
+          <h2><i class="fas fa-info-circle"></i> Status da API</h2>
+        </div>
+        <div class="panel-body">
+          <button id="testApiBtn" class="btn btn-small">
+            <i class="fas fa-sync-alt"></i> Testar Conexão
+          </button>
+          <div id="apiStatus" class="mt-2 alert alert-info" style="margin-top: 10px; display: none;"></div>
         </div>
       </div>
     </div>
@@ -71,3 +86,33 @@
 
 <%- contentFor('script') %>
 <script src="/js/main.js"></script>
+<script>
+  document.getElementById('testApiBtn').addEventListener('click', async function() {
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando...';
+    
+    const statusDiv = document.getElementById('apiStatus');
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = 'Testando conexão com a API...';
+    statusDiv.className = 'mt-2 alert alert-info';
+    
+    try {
+      const response = await fetch('/api/test-openai');
+      const data = await response.json();
+      
+      if (data.success) {
+        statusDiv.className = 'mt-2 alert alert-success';
+        statusDiv.innerHTML = `<strong>Sucesso!</strong> ${data.message}`;
+      } else {
+        statusDiv.className = 'mt-2 alert alert-warning';
+        statusDiv.innerHTML = `<strong>Falha:</strong> ${data.error}`;
+      }
+    } catch (error) {
+      statusDiv.className = 'mt-2 alert alert-warning';
+      statusDiv.innerHTML = `<strong>Erro:</strong> ${error.message}`;
+    } finally {
+      this.disabled = false;
+      this.innerHTML = '<i class="fas fa-sync-alt"></i> Testar Conexão';
+    }
+  });
+</script>
