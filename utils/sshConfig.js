@@ -19,8 +19,20 @@ const sshConfig = {
   readyTimeout: 20000,
   keepaliveInterval: 5000,
   keepaliveCountMax: 3,
+  // Atualizando os algoritmos para incluir opções mais modernas e seguras
   algorithms: {
     kex: [
+      // Adicionar algoritmos mais modernos primeiro
+      'curve25519-sha256',
+      'curve25519-sha256@libssh.org',
+      'ecdh-sha2-nistp256',
+      'ecdh-sha2-nistp384',
+      'ecdh-sha2-nistp521',
+      'diffie-hellman-group-exchange-sha256',
+      'diffie-hellman-group16-sha512',
+      'diffie-hellman-group18-sha512',
+      'diffie-hellman-group14-sha256',
+      // Manter os algoritmos mais antigos por compatibilidade
       'diffie-hellman-group14-sha1',
       'diffie-hellman-group-exchange-sha1',
       'diffie-hellman-group1-sha1'
@@ -33,6 +45,18 @@ const sshConfig = {
       'aes128-gcm@openssh.com',
       'aes256-gcm',
       'aes256-gcm@openssh.com'
+    ],
+    serverHostKey: [
+      'ssh-rsa',
+      'ecdsa-sha2-nistp256',
+      'ecdsa-sha2-nistp384',
+      'ecdsa-sha2-nistp521',
+      'ssh-ed25519'
+    ],
+    hmac: [
+      'hmac-sha2-256',
+      'hmac-sha2-512',
+      'hmac-sha1'
     ]
   }
 };
