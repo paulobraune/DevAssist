@@ -115,6 +115,12 @@ header h1 {
   transform: translateY(-2px);
 }
 
+.btn:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-small {
   padding: 6px 12px;
   font-size: 12px;
@@ -255,6 +261,15 @@ pre {
   border: 1px solid #dee2e6;
 }
 
+code {
+  background-color: #f1f3f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  color: #e83e8c;
+}
+
 .alert {
   padding: 12px 15px;
   margin-bottom: 15px;
@@ -308,4 +323,18 @@ pre {
 
 .back-link:hover {
   text-decoration: underline;
+}
+
+.fa-spinner {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#connection-status {
+  font-size: 14px;
+  font-style: italic;
 }
