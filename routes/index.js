@@ -52,20 +52,53 @@ router.get('/api/status', (req, res) => {
 // Rota para testar a conexão com a API OpenAI
 router.get('/api/test-openai', async (req, res) => {
   try {
+    // Verifica se API key está definida
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === '') {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'API Key do OpenAI não está configurada' 
+      });
+    }
+
+    // Teste simples de endpoint que não consome tokens
     const testResponse = await axios.get('https://api.openai.com/v1/models', {
       headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      }
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000 // 10s timeout
     });
+    
+    // Se chegou aqui, a conexão foi bem-sucedida
     res.json({ 
       success: true, 
       models: testResponse.data.data.length, 
       message: 'Conexão com a API OpenAI funcionando corretamente' 
     });
   } catch (error) {
+    console.error('Erro ao testar API OpenAI:', error.message);
+    
+    let errorMessage = 'Falha na conexão com a API OpenAI';
+    
+    // Extrair mensagens de erro mais específicas
+    if (error.response) {
+      console.error('Dados da resposta erro:', error.response.status, error.response.data);
+      if (error.response.status === 401) {
+        errorMessage = 'API Key inválida ou expirada';
+      } else if (error.response.status === 429) {
+        errorMessage = 'Limite de requisições excedido na API OpenAI';
+      } else if (error.response.data && error.response.data.error) {
+        errorMessage = `Erro da API: ${error.response.data.error.message || error.response.data.error}`;
+      }
+    } else if (error.code === 'ECONNABORTED') {
+      errorMessage = 'Tempo de conexão esgotado';
+    } else if (error.code === 'ENOTFOUND') {
+      errorMessage = 'Não foi possível conectar ao servidor da OpenAI (problema de DNS/rede)';
+    }
+    
     res.status(500).json({ 
       success: false, 
-      error: error.message,
+      error: errorMessage,
       details: error.response ? error.response.data : null
     });
   }
@@ -82,7 +115,7 @@ router.post('/send', async (req, res) => {
   console.log('Requisição recebida para /send', { messageLength: message.length });
   
   try {
-    console.log('Verificando API key...');
+    // Verifica se API key está definida
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === '') {
       console.error('API Key não configurada');
       return res.status(500).json({ error: 'API Key do OpenAI não configurada' });
@@ -101,7 +134,6 @@ router.post('/send', async (req, res) => {
     };
     
     console.log('API Key:', process.env.OPENAI_API_KEY.substring(0, 10) + '...[oculto]');
-    console.log('Payload:', JSON.stringify(payload, null, 2));
     
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
@@ -116,8 +148,6 @@ router.post('/send', async (req, res) => {
     );
     
     console.log('Resposta recebida da API OpenAI');
-    console.log('Status da resposta:', response.status);
-    console.log('Headers da resposta:', response.headers);
     
     // Verifica se a resposta é válida
     if (!response.data || !response.data.choices || !response.data.choices.length) {
@@ -130,24 +160,26 @@ router.post('/send', async (req, res) => {
     
     res.json(response.data);
   } catch (error) {
-    console.error('Erro na API OpenAI:', error);
+    console.error('Erro na API OpenAI:', error.message);
     
-    // Log detalhado do erro
+    let errorMessage = 'Erro ao se comunicar com a API do GPT';
+    
+    // Extrair mensagens de erro mais específicas
     if (error.response) {
-      // O servidor respondeu com um status fora do intervalo 2xx
-      console.error('Dados da resposta de erro:', error.response.data);
-      console.error('Status do erro:', error.response.status);
-      console.error('Headers do erro:', error.response.headers);
-    } else if (error.request) {
-      // A requisição foi feita mas não houve resposta
-      console.error('Requisição sem resposta:', error.request);
-    } else {
-      // Algo aconteceu na configuração da requisição que disparou um erro
-      console.error('Erro na configuração da requisição:', error.message);
+      console.error('Dados da resposta erro:', error.response.status, error.response.data);
+      if (error.response.status === 401) {
+        errorMessage = 'API Key inválida ou expirada';
+      } else if (error.response.status === 429) {
+        errorMessage = 'Limite de requisições excedido na API OpenAI';
+      } else if (error.response.data && error.response.data.error) {
+        errorMessage = `Erro da API: ${error.response.data.error.message || error.response.data.error}`;
+      }
+    } else if (error.code === 'ECONNABORTED') {
+      errorMessage = 'Tempo de conexão esgotado';
     }
     
     res.status(500).json({ 
-      error: "Erro ao se comunicar com a API do GPT",
+      error: errorMessage,
       message: error.message,
       details: error.response ? error.response.data : null
     });
@@ -172,7 +204,30 @@ router.get('/analyze/:filename', async (req, res) => {
   const filePath = path.join(FILES_DIR, filename);
   
   try {
+    // Verifica se o arquivo existe
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).render('error', { 
+        message: `Arquivo "${filename}" não encontrado`, 
+        title: "Erro de Análise" 
+      });
+    }
+    
+    // Verifica se API key está definida
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === '') {
+      return res.status(500).render('error', { 
+        message: "API Key do OpenAI não está configurada", 
+        title: "Erro de Configuração" 
+      });
+    }
+    
     const fileContent = fs.readFileSync(filePath, 'utf-8');
+    if (!fileContent || fileContent.trim() === '') {
+      return res.status(400).render('error', { 
+        message: "O arquivo está vazio", 
+        title: "Erro de Análise" 
+      });
+    }
+    
     const fileExtension = path.extname(filename).toLowerCase();
     
     // Determina o tipo de arquivo para melhor análise
@@ -188,6 +243,8 @@ router.get('/analyze/:filename', async (req, res) => {
     } else if (['.css'].includes(fileExtension)) {
       fileType = "CSS";
     }
+    
+    console.log(`Analisando arquivo ${filename} (tipo: ${fileType})...`);
     
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
@@ -207,9 +264,14 @@ router.get('/analyze/:filename', async (req, res) => {
         headers: {
           'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 60000 // 60 segundos de timeout para análises de arquivos
       }
     );
+    
+    if (!response.data || !response.data.choices || !response.data.choices.length) {
+      throw new Error('Formato de resposta inválido da API OpenAI');
+    }
     
     res.render('analysis', { 
       filename, 
@@ -218,9 +280,25 @@ router.get('/analyze/:filename', async (req, res) => {
       title: `Análise: ${filename}`
     });
   } catch (error) {
-    console.error('Erro ao analisar arquivo:', error);
+    console.error('Erro ao analisar arquivo:', error.message);
+    
+    let mensagemErro = "Erro ao analisar o arquivo";
+    
+    // Extrair mensagens de erro mais específicas
+    if (error.response) {
+      if (error.response.status === 401) {
+        mensagemErro = 'API Key inválida ou expirada';
+      } else if (error.response.status === 429) {
+        mensagemErro = 'Limite de requisições excedido na API OpenAI';
+      } else if (error.response.data && error.response.data.error) {
+        mensagemErro = `Erro da API: ${error.response.data.error.message || error.response.data.error}`;
+      }
+    } else if (error.code === 'ECONNABORTED') {
+      mensagemErro = 'Tempo de conexão esgotado. O arquivo pode ser muito grande para análise.';
+    }
+    
     res.status(500).render('error', { 
-      message: "Erro ao analisar o arquivo", 
+      message: mensagemErro, 
       title: "Erro de Análise" 
     });
   }
@@ -230,19 +308,28 @@ router.get('/analyze/:filename', async (req, res) => {
 router.get('/file/:filename', (req, res) => {
   const { filename } = req.params;
   const filePath = path.join(FILES_DIR, filename);
-  fs.readFile(filePath, 'utf-8', (err, content) => {
-    if (err) {
+  
+  try {
+    if (!fs.existsSync(filePath)) {
       return res.status(404).render('error', { 
         message: "Arquivo não encontrado", 
         title: "Erro" 
       });
     }
+    
+    const content = fs.readFileSync(filePath, 'utf-8');
     res.render('file', { 
       filename, 
       content, 
       title: `Arquivo: ${filename}` 
     });
-  });
+  } catch (error) {
+    console.error('Erro ao ler arquivo:', error);
+    res.status(500).render('error', { 
+      message: "Erro ao ler o arquivo", 
+      title: "Erro" 
+    });
+  }
 });
 
 module.exports = router;
