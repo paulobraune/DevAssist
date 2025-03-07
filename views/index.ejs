@@ -87,32 +87,40 @@
 <%- contentFor('script') %>
 <script src="/js/main.js"></script>
 <script>
-  document.getElementById('testApiBtn').addEventListener('click', async function() {
-    this.disabled = true;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando...';
-    
-    const statusDiv = document.getElementById('apiStatus');
-    statusDiv.style.display = 'block';
-    statusDiv.innerHTML = 'Testando conexão com a API...';
-    statusDiv.className = 'mt-2 alert alert-info';
-    
-    try {
-      const response = await fetch('/api/test-openai');
-      const data = await response.json();
-      
-      if (data.success) {
-        statusDiv.className = 'mt-2 alert alert-success';
-        statusDiv.innerHTML = `<strong>Sucesso!</strong> ${data.message}`;
-      } else {
-        statusDiv.className = 'mt-2 alert alert-warning';
-        statusDiv.innerHTML = `<strong>Falha:</strong> ${data.error}`;
-      }
-    } catch (error) {
-      statusDiv.className = 'mt-2 alert alert-warning';
-      statusDiv.innerHTML = `<strong>Erro:</strong> ${error.message}`;
-    } finally {
-      this.disabled = false;
-      this.innerHTML = '<i class="fas fa-sync-alt"></i> Testar Conexão';
+  document.addEventListener('DOMContentLoaded', function() {
+    const testButton = document.getElementById('testApiBtn');
+    if (testButton) {
+      testButton.addEventListener('click', async function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando...';
+        
+        const statusDiv = document.getElementById('apiStatus');
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = 'Testando conexão com a API...';
+        statusDiv.className = 'mt-2 alert alert-info';
+        
+        try {
+          const response = await fetch('/api/test-openai');
+          const data = await response.json();
+          
+          if (data.success) {
+            statusDiv.className = 'mt-2 alert alert-success';
+            statusDiv.innerHTML = `<strong>Sucesso!</strong> ${data.message}`;
+          } else {
+            statusDiv.className = 'mt-2 alert alert-warning';
+            statusDiv.innerHTML = `<strong>Falha:</strong> ${data.error}`;
+          }
+        } catch (error) {
+          console.error('Erro ao testar API:', error);
+          statusDiv.className = 'mt-2 alert alert-warning';
+          statusDiv.innerHTML = `<strong>Erro:</strong> Falha na comunicação com o servidor: ${error.message}`;
+        } finally {
+          this.disabled = false;
+          this.innerHTML = '<i class="fas fa-sync-alt"></i> Testar Conexão';
+        }
+      });
+    } else {
+      console.error('Botão de teste não encontrado!');
     }
   });
 </script>
