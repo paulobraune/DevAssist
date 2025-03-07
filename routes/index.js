@@ -48,15 +48,23 @@ router.get('/', (req, res) => {
 router.post('/send', async (req, res) => {
   const { message } = req.body;
   try {
+    console.log('Enviando mensagem para a API OpenAI:', message);
+    
+    const payload = {
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: "Você é um assistente de desenvolvimento especializado em analisar código e ajudar programadores. Forneça respostas técnicas precisas e úteis." },
+        { role: 'user', content: message }
+      ],
+      temperature: 0.7,
+      max_tokens: 1500
+    };
+    
+    console.log('Payload da requisição:', JSON.stringify(payload));
+    
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: "Você é um assistente de desenvolvimento especializado em analisar código e ajudar programadores. Forneça respostas técnicas precisas e úteis." },
-          { role: 'user', content: message }
-        ]
-      },
+      payload,
       {
         headers: {
           'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -64,12 +72,40 @@ router.post('/send', async (req, res) => {
         }
       }
     );
+    
+    console.log('Resposta recebida da API OpenAI');
+    
+    // Verifica se a resposta é válida
+    if (!response.data || !response.data.choices || !response.data.choices.length) {
+      console.error('Resposta inválida da API:', response.data);
+      return res.status(500).json({
+        error: "Formato de resposta inválido da API OpenAI",
+        details: response.data
+      });
+    }
+    
     res.json(response.data);
   } catch (error) {
-    console.error('Erro na API OpenAI:', error.response ? error.response.data : error.message);
+    console.error('Erro na API OpenAI:', error);
+    
+    // Log detalhado do erro
+    if (error.response) {
+      // O servidor respondeu com um status fora do intervalo 2xx
+      console.error('Dados da resposta de erro:', error.response.data);
+      console.error('Status do erro:', error.response.status);
+      console.error('Headers do erro:', error.response.headers);
+    } else if (error.request) {
+      // A requisição foi feita mas não houve resposta
+      console.error('Requisição sem resposta:', error.request);
+    } else {
+      // Algo aconteceu na configuração da requisição que disparou um erro
+      console.error('Erro na configuração da requisição:', error.message);
+    }
+    
     res.status(500).json({ 
       error: "Erro ao se comunicar com a API do GPT",
-      message: error.message 
+      message: error.message,
+      details: error.response ? error.response.data : null
     });
   }
 });
@@ -119,7 +155,9 @@ router.get('/analyze/:filename', async (req, res) => {
             content: `Você é um assistente especializado em análise de código. Analise o seguinte código ${fileType} e forneça insights, melhorias possíveis e identifique potenciais bugs.` 
           },
           { role: 'user', content: fileContent }
-        ]
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
       },
       {
         headers: {
@@ -136,7 +174,7 @@ router.get('/analyze/:filename', async (req, res) => {
       title: `Análise: ${filename}`
     });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao analisar arquivo:', error);
     res.status(500).render('error', { 
       message: "Erro ao analisar o arquivo", 
       title: "Erro de Análise" 
