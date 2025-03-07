@@ -1,0 +1,28 @@
+<div class="container">
+  <div class="panel">
+    <div class="panel-header">
+      <h2><i class="fas fa-exclamation-triangle"></i> Erro</h2>
+    </div>
+    <div class="panel-body">
+      <div class="alert alert-warning">
+        <p><%= message %></p>
+        <% if (message.includes('limite de requisições')) { %>
+          <hr>
+          <p><strong>O que isso significa?</strong> A API da OpenAI limita o número de solicitações que você pode fazer em um determinado período. 
+          Essa limitação é aplicada para garantir o uso justo do serviço.</p>
+          <p><strong>Como resolver:</strong> Aguarde alguns minutos antes de tentar novamente.</p>
+        <% } %>
+      </div>
+      <div class="actions" style="margin-top: 20px;">
+        <a href="/" class="btn">
+          <i class="fas fa-home"></i> Voltar para a página inicial
+        </a>
+        <% if (typeof title !== 'undefined' && title.includes("Análise")) { %>
+          <button onclick="window.history.back()" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+          </button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
