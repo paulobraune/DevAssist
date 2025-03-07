@@ -44,11 +44,51 @@ router.get('/', (req, res) => {
   });
 });
 
+// Rota para verificar status da API
+router.get('/api/status', (req, res) => {
+  res.json({ status: 'online', timestamp: new Date().toISOString() });
+});
+
+// Rota para testar a conexão com a API OpenAI
+router.get('/api/test-openai', async (req, res) => {
+  try {
+    const testResponse = await axios.get('https://api.openai.com/v1/models', {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      }
+    });
+    res.json({ 
+      success: true, 
+      models: testResponse.data.data.length, 
+      message: 'Conexão com a API OpenAI funcionando corretamente' 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      details: error.response ? error.response.data : null
+    });
+  }
+});
+
 // Rota para enviar mensagens para o GPT
 router.post('/send', async (req, res) => {
   const { message } = req.body;
+  
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ error: 'A mensagem é obrigatória' });
+  }
+  
+  console.log('Requisição recebida para /send', { messageLength: message.length });
+  
   try {
-    console.log('Enviando mensagem para a API OpenAI:', message);
+    console.log('Verificando API key...');
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === '') {
+      console.error('API Key não configurada');
+      return res.status(500).json({ error: 'API Key do OpenAI não configurada' });
+    }
+    
+    console.log('Enviando mensagem para a API OpenAI...');
     
     const payload = {
       model: 'gpt-3.5-turbo',
@@ -60,7 +100,8 @@ router.post('/send', async (req, res) => {
       max_tokens: 1500
     };
     
-    console.log('Payload da requisição:', JSON.stringify(payload));
+    console.log('API Key:', process.env.OPENAI_API_KEY.substring(0, 10) + '...[oculto]');
+    console.log('Payload:', JSON.stringify(payload, null, 2));
     
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
@@ -69,11 +110,14 @@ router.post('/send', async (req, res) => {
         headers: {
           'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 30000 // 30 segundos de timeout
       }
     );
     
     console.log('Resposta recebida da API OpenAI');
+    console.log('Status da resposta:', response.status);
+    console.log('Headers da resposta:', response.headers);
     
     // Verifica se a resposta é válida
     if (!response.data || !response.data.choices || !response.data.choices.length) {
