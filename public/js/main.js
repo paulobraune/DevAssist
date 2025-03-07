@@ -1,6 +1,11 @@
 document.getElementById('chatForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const message = document.getElementById('message').value;
+  
+  if (!message.trim()) {
+    return; // Evita enviar mensagens vazias
+  }
+  
   const responseDiv = document.getElementById('chatResponses');
 
   // Adiciona a mensagem do usuário à interface
@@ -23,6 +28,8 @@ document.getElementById('chatForm').addEventListener('submit', async (e) => {
     responseDiv.querySelector('.messages-wrapper').appendChild(loadingMsg);
     responseDiv.scrollTop = responseDiv.scrollHeight;
 
+    console.log('Enviando mensagem:', message);
+    
     const response = await fetch('/send', {
       method: 'POST',
       headers: {
@@ -32,11 +39,12 @@ document.getElementById('chatForm').addEventListener('submit', async (e) => {
     });
     
     const data = await response.json();
+    console.log('Resposta recebida:', data);
 
     // Remove o indicador de carregamento
     responseDiv.querySelector('.messages-wrapper').removeChild(loadingMsg);
 
-    // Exibe a resposta do GPT (usando a primeira escolha)
+    // Exibe a resposta do GPT
     if (data.choices && data.choices.length) {
       const gptMsg = data.choices[0].message.content;
       const gptMsgContainer = document.createElement('div');
@@ -44,14 +52,21 @@ document.getElementById('chatForm').addEventListener('submit', async (e) => {
       gptMsgContainer.innerHTML = `<strong>DevAssist GPT:</strong> ${formatMessage(gptMsg)}`;
       responseDiv.querySelector('.messages-wrapper').appendChild(gptMsgContainer);
       responseDiv.scrollTop = responseDiv.scrollHeight;
+    } else if (data.error) {
+      // Mostra mensagem de erro da API
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'message gpt-message';
+      errorMsg.innerHTML = `<strong>Erro:</strong> ${data.error}. ${data.message || ''}`;
+      responseDiv.querySelector('.messages-wrapper').appendChild(errorMsg);
+      responseDiv.scrollTop = responseDiv.scrollHeight;
     }
   } catch (error) {
-    console.error(error);
+    console.error('Erro na comunicação:', error);
     
     // Exibe mensagem de erro
     const errorMsg = document.createElement('div');
     errorMsg.className = 'message gpt-message';
-    errorMsg.innerHTML = '<strong>Erro:</strong> Não foi possível se comunicar com a API do GPT.';
+    errorMsg.innerHTML = '<strong>Erro:</strong> Não foi possível se comunicar com a API do GPT. Verifique o console para mais detalhes.';
     responseDiv.querySelector('.messages-wrapper').appendChild(errorMsg);
     responseDiv.scrollTop = responseDiv.scrollHeight;
   }
@@ -80,4 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
     wrapper.className = 'messages-wrapper';
     responseDiv.appendChild(wrapper);
   }
+  
+  console.log('Chat inicializado e pronto para usar!');
 });
