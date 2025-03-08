@@ -1,0 +1,57 @@
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card bg-dark border-danger shadow-custom mt-5">
+      <div class="card-header bg-danger bg-opacity-25 text-danger border-danger d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <h5 class="card-title mb-0">Erro</h5>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-danger bg-opacity-25 border-danger text-light">
+          <p class="mb-0"><%= message %></p>
+          
+          <% if (message.includes('limite de requisições')) { %>
+            <hr class="border-danger opacity-25 my-3">
+            <div class="bg-darkest p-3 rounded-custom-sm mt-2">
+              <h6 class="fw-bold text-light mb-2">O que isso significa?</h6>
+              <p>A API da OpenAI limita o número de solicitações que você pode fazer em um determinado período. 
+              Essa limitação é aplicada para garantir o uso justo do serviço.</p>
+              
+              <h6 class="fw-bold text-light mb-2">Como resolver:</h6>
+              <ol class="mb-0 ps-3">
+                <li>Aguarde alguns minutos antes de tentar novamente</li>
+                <li>Verifique seu plano de uso da API OpenAI</li>
+                <li>Considere implementar um sistema de cache para reduzir requisições</li>
+              </ol>
+            </div>
+          <% } else if (message.includes('SSH') || message.includes('remoto')) { %>
+            <hr class="border-danger opacity-25 my-3">
+            <div class="bg-darkest p-3 rounded-custom-sm mt-2">
+              <h6 class="fw-bold text-light mb-2">Problema de conexão SSH</h6>
+              <p>Ocorreu um erro na comunicação com o servidor remoto via SSH. Isso pode ser causado por:</p>
+              <ul class="ps-3">
+                <li>Credenciais incorretas ou expiradas</li>
+                <li>Servidor remoto fora do ar ou inacessível</li>
+                <li>Problemas de rede ou firewall</li>
+                <li>Diretório remoto inexistente ou sem permissão de acesso</li>
+              </ul>
+            </div>
+          <% } %>
+        </div>
+        
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-4">
+          <a href="/" class="btn btn-primary d-flex align-items-center justify-content-center">
+            <i class="bi bi-house me-2"></i>Página Inicial
+          </a>
+          <% if (typeof title !== 'undefined' && title.includes("Análise")) { %>
+            <button onclick="window.history.back()" class="btn btn-outline-light d-flex align-items-center justify-content-center">
+              <i class="bi bi-arrow-left me-2"></i>Voltar
+            </button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add a page identifier for script checks -->
+<div id="page-type" data-page="error" style="display: none;"></div>

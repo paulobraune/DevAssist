@@ -1,0 +1,40 @@
+ ecommerce: {
+    "currency": "",
+    "value": "",
+    "transaction_id": "",
+    "shipping": "",
+    "tax": "",
+    "coupon": "",
+    "payment_type": "",
+    "payment_status": "",
+    "item_list_name": "",
+    "search_term": "",
+    "items": [
+      {
+        "item_id": "",
+        "variant_id": "",
+        "item_name": "",
+        "item_brand": "",
+	"item_category": "",
+	"item_category2": "",
+	"item_category3": "",
+        "item_category4": "",
+        "item_variant": "",
+        "price": "",
+        "quantity": ""
+      }
+    ]
+  }
+}
+
+userdata: {
+  "em": "", (email)
+  "fn": "", (primeiro nome)
+  "ln": "", (ultimo nome)
+  "ph": "", (phone number)
+  "fa": "", (Address 1)
+  "ct": "", (City)
+  "st": "", (State)
+  "zp": "", (Zip)
+  "cn": "", (Country)
+}

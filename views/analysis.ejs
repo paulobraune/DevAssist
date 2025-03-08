@@ -1,0 +1,61 @@
+<div class="row">
+  <div class="col-12">
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/file/<%= filename %>">Arquivo</a></li>
+        <li class="breadcrumb-item active">Análise</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+    
+<div class="row g-4">
+  <div class="col-xl-6 col-lg-12">
+    <div class="card shadow-custom h-100">
+      <div class="card-header sticky-top bg-dark">
+        <div class="d-flex align-items-center">
+          <h5 class="card-title mb-0 text-truncate">
+            <i class="bi bi-file-earmark-code text-primary me-2"></i>
+            Código: <%= filename %>
+          </h5>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="bg-darker p-3" style="height: 600px; overflow-y: auto;">
+          <pre class="mb-0 language-javascript"><code class="text-light"><%= content %></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-xl-6 col-lg-12">
+    <div class="card shadow-custom h-100">
+      <div class="card-header sticky-top bg-dark">
+        <div class="d-flex align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-robot text-primary me-2"></i>
+            Análise do DevAssist GPT
+          </h5>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="analysis-content bg-darker p-4" style="height: 600px; overflow-y: auto;">
+          <%- analysis.replace(/\n/g, '<br>').replace(/```([\s\S]*?)```/g, '<pre class="bg-darkest p-3 my-3 rounded-custom-sm">$1</pre>').replace(/`([^`]+)`/g, '<code class="bg-darkest px-2 py-1 rounded-custom-sm">$1</code>') %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-center mt-4 gap-3">
+  <a href="/" class="btn btn-outline-light">
+    <i class="bi bi-house me-2"></i>Voltar para Home
+  </a>
+  <a href="/file/<%= filename %>" class="btn btn-primary">
+    <i class="bi bi-file-earmark-text me-2"></i>Ver Arquivo Original
+  </a>
+</div>
+
+<!-- Add a page identifier for script checks -->
+<div id="page-type" data-page="analysis" style="display: none;"></div>

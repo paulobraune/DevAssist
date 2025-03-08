@@ -1,0 +1,473 @@
+<div class="row g-4">
+  <!-- Main Content Area -->
+  <div class="col-lg-8 order-2 order-lg-1">
+    <!-- Chat Card -->
+    <div class="card shadow-custom h-100">
+      <div class="chat-tabs-container">
+        <div class="chat-tabs" id="chatTabs">
+          <!-- Chat tabs will be rendered here dynamically -->
+          <div class="chat-tab active" data-tab-id="tab-1">
+            <span class="chat-tab-name">Chat 1</span>
+            <button type="button" class="close-tab" title="Fechar" data-tab-id="tab-1">×</button>
+          </div>
+          <button type="button" class="add-tab-button" title="Nova conversa">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+        <div class="chat-tabs-actions">
+          <button type="button" class="tab-scroll-button tab-scroll-left" title="Rolar para esquerda">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button type="button" class="tab-scroll-button tab-scroll-right" title="Rolar para direita">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="card-body d-flex flex-column p-0">
+        <!-- Chat tab content -->
+        <div class="chat-tab-content active" data-tab-id="tab-1">
+          <div class="chat-container-wrapper active" data-tab-id="tab-1">
+            <div id="chatResponses-tab-1" class="chat-container flex-grow-1">
+              <div class="messages-wrapper">
+                <div class="message">
+                  <div class="message-avatar">
+                    <i class="bi bi-robot"></i>
+                  </div>
+                  <div class="message-content">
+                    <div class="message-text">
+                      <p class="mb-1">Olá! Sou o DevAssist GPT, seu assistente de desenvolvimento. Como posso ajudar você hoje?</p>
+                      <ul class="mb-0 ps-3">
+                        <li>Analisar seu código</li>
+                        <li>Responder dúvidas de programação</li>
+                        <li>Sugerir melhorias e otimizações</li>
+                        <li>Explicar conceitos técnicos</li>
+                      </ul>
+                    </div>
+                    <div class="message-time">Agora</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <form id="chatForm-tab-1" class="chat-form p-3" data-tab-id="tab-1">
+              <div class="input-group mb-2">
+                <textarea id="message-tab-1" name="message" class="form-control chat-message" placeholder="Digite sua pergunta ou problema de programação..." rows="3" required></textarea>
+              </div>
+              <div class="token-counter">
+                <div class="token-counter-text">
+                  <span class="token-count">0 tokens</span>
+                  <span class="token-limit">Limite: 16385 tokens</span>
+                </div>
+                <div class="token-counter-progress">
+                  <div class="token-counter-bar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div class="d-flex gap-2 mt-2">
+                <button id="addDirStructureBtn-tab-1" type="button" class="btn btn-outline-primary flex-grow-1">
+                  <i class="bi bi-folder-fill me-2"></i>Estrutura
+                </button>
+                <button id="addAllFilesBtn-tab-1" type="button" class="btn btn-outline-primary flex-grow-1">
+                  <i class="bi bi-files me-2"></i>Arquivos
+                </button>
+                <button type="submit" class="btn btn-primary flex-grow-2">
+                  <i class="bi bi-send me-2"></i>Enviar
+                </button>
+              </div>
+              <div class="model-selector-container mt-3">
+                <label for="model-select-tab-1" class="form-label d-flex justify-content-between">
+                  <span>Modelo:</span>
+                  <span class="model-description text-muted small"></span>
+                </label>
+                <select id="model-select-tab-1" class="form-select model-select" data-tab-id="tab-1">
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="gpt-4o-mini">GPT-4o Mini</option>
+                  <option value="o1">GPT-o1</option>
+                  <option value="o1-mini">GPT-o1 Mini</option>
+                  <option value="o3-mini">GPT-o3 Mini</option>
+                </select>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sidebar -->
+  <div class="col-lg-4 order-1 order-lg-2">
+    <!-- Files Card -->
+    <div class="card shadow-custom mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-folder2-open text-primary me-2"></i>Arquivos
+        </h5>
+        <div class="d-flex align-items-center">
+          <span class="badge bg-primary-subtle rounded-pill me-2">
+            <%= files.length %> <%= files.length === 1 ? 'arquivo' : 'arquivos' %>
+          </span>
+          <span class="badge rounded-pill" id="ssh-status-badge">Verificando...</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Nova entrada para criar pasta -->
+        <div class="new-folder-form mb-3">
+          <div class="input-group">
+            <input type="text" id="newFolderName" class="form-control form-control-sm" placeholder="Nova pasta">
+            <button type="button" id="createFolderBtn" class="btn btn-sm btn-primary">
+              <i class="bi bi-folder-plus"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Breadcrumb para navegação de pastas -->
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-3 bg-dark p-2 rounded-custom-sm">
+            <li class="breadcrumb-item"><a href="#" data-path="/" class="folder-breadcrumb-link">Raiz</a></li>
+            <!-- breadcrumb dinâmico será adicionado aqui -->
+          </ol>
+        </nav>
+        
+        <% if(files.length === 0) { %>
+          <div class="empty-state">
+            <i class="bi bi-file-earmark-x empty-state-icon"></i>
+            <h6 class="mb-2">Nenhum arquivo encontrado</h6>
+            <p class="text-light small mb-0">
+              <% if (typeof useLocalFolder !== 'undefined' && useLocalFolder) { %>
+                Pasta local vazia: <%= localDir || '/files' %>
+              <% } else if (typeof error !== 'undefined' && error) { %>
+                <%= error %>
+              <% } else { %>
+                <%= appMode === 'development' ? 'Usando pasta local /files' : 'Conectado via SSH: 104.238.145.89' %>
+              <% } %>
+            </p>
+          </div>
+        <% } else { %>
+          <div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;" id="filesList">
+            <% files.forEach(function(file) { %>
+              <% if (file.type === 'directory') { %>
+                <!-- Folder item -->
+                <div class="file-item rounded-custom-sm" data-filename="<%= file.path %>" data-type="directory" draggable="true">
+                  <i class="bi bi-folder-fill file-icon" style="color: var(--primary-color);"></i>
+                  <div class="file-name">
+                    <a href="#" class="text-light text-decoration-none folder-link" data-path="<%= file.path %>">
+                      <%= file.name %>
+                    </a>
+                  </div>
+                  <div class="file-actions">
+                    <button class="btn btn-sm btn-danger rounded-pill ms-1 delete-file-btn" 
+                      data-filename="<%= file.path %>" data-bs-toggle="tooltip" title="Excluir pasta">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              <% } else { %>
+                <!-- File item -->
+                <div class="file-item rounded-custom-sm" data-filename="<%= file.path %>" data-type="file" draggable="true">
+                  <i class="bi bi-file-earmark-code file-icon"></i>
+                  <div class="file-name">
+                    <a href="/file/<%= file.path %>" class="text-light text-decoration-none">
+                      <%= file.name %>
+                    </a>
+                  </div>
+                  <div class="file-actions">
+                    <a href="/analyze/<%= file.path %>" class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="tooltip" title="Analisar com GPT">
+                      <i class="bi bi-search"></i>
+                    </a>
+                    <button class="btn btn-sm btn-danger rounded-pill delete-file-btn" 
+                      data-filename="<%= file.path %>" data-bs-toggle="tooltip" title="Excluir arquivo">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              <% } %>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+      <div class="card-footer bg-dark border-medium p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="d-flex align-items-center text-light">
+            <i class="bi <%= typeof useLocalFolder !== 'undefined' && useLocalFolder ? 'bi-folder' : 'bi-hdd-network' %> text-primary me-2"></i>
+            <small>
+              <% if (typeof useLocalFolder !== 'undefined' && useLocalFolder) { %>
+                Pasta local: <%= typeof localDir !== 'undefined' ? localDir : '/files' %>
+              <% } else { %>
+                Servidor SSH
+              <% } %>
+            </small>
+          </div>
+          <button id="toggleStorageBtn" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" 
+            title="<%= typeof useLocalFolder !== 'undefined' && useLocalFolder ? 'Alternar para SSH' : 'Alternar para pasta local' %>">
+            <i class="bi <%= typeof useLocalFolder !== 'undefined' && useLocalFolder ? 'bi-hdd-network' : 'bi-folder' %>"></i>
+          </button>
+        </div>
+        <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+          <input class="d-none" type="file" id="file" name="file" required>
+          <label for="file" class="upload-dropzone mb-2" id="dropzone">
+            <div class="text-center">
+              <i class="bi bi-cloud-arrow-up text-primary upload-icon"></i>
+              <h6 class="fw-bold">Arraste o arquivo ou clique aqui</h6>
+              <p class="text-light small mb-0">
+                <%= typeof useLocalFolder !== 'undefined' && useLocalFolder ? 'Upload para pasta local' : 'Upload para servidor remoto' %>
+              </p>
+            </div>
+          </label>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-upload me-2"></i>Enviar Arquivo
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- API Status Card -->
+    <div class="card shadow-custom">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-lightning-charge text-primary me-2"></i>Status da API
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span>Status:</span>
+          <span class="badge rounded-pill" id="api-status-badge">Verificando...</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span>Modelo:</span>
+          <div class="d-flex align-items-center">
+            <select id="gptModel" class="form-select form-select-sm bg-dark border-medium text-light" style="width: 150px;">
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              <option value="gpt-4">GPT-4</option>
+              <option value="gpt-4-turbo">GPT-4 Turbo</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="gpt-4o-mini">GPT-4o Mini</option>
+              <option value="o1">GPT-o1</option>
+              <option value="o1-mini">GPT-o1 Mini</option>
+              <option value="o3-mini">GPT-o3 Mini</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span>Modo:</span>
+          <span class="badge text-light" style="background-color: var(--primary-color);">
+            <%= appMode === 'development' ? 'Desenvolvimento' : 'Produção' %>
+          </span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span>Armazenamento:</span>
+          <span class="badge text-light" style="background-color: #201987;">
+            <%= typeof useLocalFolder !== 'undefined' && useLocalFolder ? 'PASTA LOCAL' : 'SSH' %>
+          </span>
+        </div>
+        <button id="testApiBtn" class="btn btn-primary w-100 mt-2">
+          <i class="bi bi-arrow-repeat me-2"></i>Testar Conexão
+        </button>
+        <div id="apiStatus" class="alert mt-3" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating action button for mobile -->
+<div class="d-lg-none">
+  <button class="floating-action-btn d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+</div>
+
+<!-- Connection badge (hidden) -->
+<span class="badge rounded-pill d-none" id="connection-badge">
+  <span class="spinner-border spinner-border-sm" style="width: 0.7rem; height: 0.7rem;" role="status" aria-hidden="true"></span>
+  <span class="ms-1">Conectando...</span>
+</span>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-light border-medium">
+      <div class="modal-header border-medium">
+        <h5 class="modal-title" id="settingsModalLabel">
+          <i class="bi bi-gear-fill text-primary me-2"></i>
+          Configurações do DevAssist GPT
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="modelSelect" class="form-label">Modelo do GPT</label>
+              <select id="modelSelect" class="form-select bg-medium border-medium text-light">
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Rápido, Econômico)</option>
+                <option value="gpt-4">GPT-4 (Avançado)</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo (Avançado, Rápido)</option>
+                <option value="gpt-4o">GPT-4o (Alto Desempenho)</option>
+                <option value="gpt-4o-mini">GPT-4o Mini (Econômico)</option>
+                <option value="o1">GPT-o1 (Última Geração)</option>
+                <option value="o1-mini">GPT-o1 Mini (Rápido, Nova Geração)</option>
+                <option value="o3-mini">GPT-o3 Mini (Desempenho Intermediário)</option>
+              </select>
+              <div class="form-text text-light">Selecione o modelo de IA para utilizar nas consultas</div>
+            </div>
+            
+            <div class="mt-4">
+              <label class="form-label">Conexão SSH</label>
+              <div class="bg-medium p-3 rounded-custom-sm mb-3">
+                <!-- Formulário para edição das configurações SSH -->
+                <div class="mb-2">
+                  <label for="sshHost" class="form-label small mb-1">Host (IP ou Domínio):</label>
+                  <input type="text" id="sshHost" class="form-control form-control-sm bg-dark border-medium text-light" placeholder="104.238.145.89">
+                </div>
+                <div class="mb-2">
+                  <label for="sshPort" class="form-label small mb-1">Porta:</label>
+                  <input type="number" id="sshPort" class="form-control form-control-sm bg-dark border-medium text-light" placeholder="22" min="1" max="65535">
+                </div>
+                <div class="mb-2">
+                  <label for="sshDir" class="form-label small mb-1">Diretório Remoto:</label>
+                  <input type="text" id="sshDir" class="form-control form-control-sm bg-dark border-medium text-light" placeholder="/home/user/files/">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Modo de Armazenamento</label>
+              <div class="bg-medium p-3 rounded-custom-sm">
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="useLocalFolderSwitch" <%= typeof useLocalFolder !== 'undefined' && useLocalFolder ? 'checked' : '' %>>
+                  <label class="form-check-label" for="useLocalFolderSwitch">
+                    Usar pasta local em vez de SSH
+                  </label>
+                </div>
+                <div class="form-text mb-3">
+                  <% if (appMode === 'development') { %>
+                    No modo de desenvolvimento, a pasta local é usada por padrão. Desative esta opção para forçar o uso de SSH.
+                  <% } else { %>
+                    No modo de produção, o SSH é usado por padrão. Ative esta opção para forçar o uso da pasta local.
+                  <% } %>
+                </div>
+                
+                <div id="localFolderSection" class="<%= typeof useLocalFolder !== 'undefined' && useLocalFolder ? '' : 'd-none' %>">
+                  <label for="localDir" class="form-label small mb-1">Pasta Local:</label>
+                  <div class="input-group input-group-sm mb-2">
+                    <input type="text" id="localDir" class="form-control form-control-sm bg-dark border-medium text-light" 
+                      value="<%= typeof localDir !== 'undefined' ? localDir : '/home/project/files' %>" 
+                      placeholder="/home/project/files">
+                    <button class="btn btn-outline-primary" type="button" id="browseFolderBtn" title="Procurar pasta">
+                      <i class="bi bi-folder2-open"></i>
+                    </button>
+                    <button class="btn btn-outline-primary" type="button" id="resetDefaultDirBtn" title="Restaurar pasta padrão">
+                      <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                  </div>
+                  <!-- Input oculto para seleção de diretório -->
+                  <input type="file" id="folderSelector" webkitdirectory directory multiple class="d-none">
+                  <div class="form-text">
+                    Caminho para pasta local onde os arquivos serão armazenados
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <label class="form-label">Modo da Aplicação</label>
+              <div class="bg-medium p-3 rounded-custom-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-bold mb-1">Modo Atual: 
+                      <span class="badge text-light" style="background-color: var(--primary-color);">
+                        <%= appMode === 'development' ? 'Desenvolvimento' : 'Produção' %>
+                      </span>
+                    </div>
+                    <div class="form-text">
+                      <% if (appMode === 'development') { %>
+                        No modo de desenvolvimento, as operações são simplificadas e mais voltadas à depuração.
+                      <% } else { %>
+                        No modo de produção, todas as verificações e operações são realizadas normalmente.
+                      <% } %>
+                    </div>
+                  </div>
+                  <button type="button" id="toggleAppModeBtn" class="btn btn-sm btn-outline-light">
+                    <i class="bi <%= appMode === 'development' ? 'bi-rocket' : 'bi-tools' %> me-2"></i>
+                    Alternar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-medium">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="saveSettings">
+          <i class="bi bi-check-lg me-2"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete File Confirmation Modal -->
+<div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light border-medium">
+      <div class="modal-header border-medium">
+        <h5 class="modal-title" id="deleteFileModalLabel">
+          <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+          Confirmar Exclusão
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja excluir o arquivo <strong id="fileToDelete"></strong>?</p>
+        <p class="mb-0 text-danger">Esta ação não pode ser desfeita.</p>
+      </div>
+      <div class="modal-footer border-medium">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+          <i class="bi bi-trash me-2"></i>Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Folder Modal -->
+<div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light border-medium">
+      <div class="modal-header border-medium">
+        <h5 class="modal-title" id="createFolderModalLabel">
+          <i class="bi bi-folder-plus text-primary me-2"></i>
+          Nova Pasta
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="folderNameInput" class="form-label">Nome da Pasta</label>
+          <input type="text" class="form-control" id="folderNameInput" placeholder="Digite o nome da pasta">
+        </div>
+        <div class="mb-3">
+          <label for="parentFolderSelect" class="form-label">Pasta Principal</label>
+          <select class="form-select" id="parentFolderSelect">
+            <option value="/">Raiz</option>
+            <!-- Other folders will be populated dynamically -->
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer border-medium">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmCreateFolderBtn">
+          <i class="bi bi-folder-plus me-2"></i>Criar Pasta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add a page identifier for script checks -->
+<div id="page-type" data-page="index" style="display: none;"></div>
